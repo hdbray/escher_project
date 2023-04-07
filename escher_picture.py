@@ -177,28 +177,53 @@ def poincare_orthocircle(v,w,default_color='black',default_linewidth=1):
     w_hor=w[0]
     w_vert=w[1]
 
-    if v_hor==0 and w_hor==0:
-        draw_circle=draw_lines([[0,-1],[0,1]],default_color,default_linewidth)
-    elif v_vert==0 and w_vert==0:
-        draw_circle=draw_lines([[-1,0],[1,0]],default_color,default_linewidth)
-    else: 
 
-    # find intersection of lines tangent to circle at each point
-
-    
+    if v_vert!=0:
         v_slope=slope_of_circ(v)
-        w_slope=slope_of_circ(w)
-
         v_height=-v_hor*v_slope+v_vert
+    if w_vert!=0:
+        w_slope=slope_of_circ(w)
         w_height=-w_hor*w_slope+w_vert
 
-        center=intersect_lines(v_slope,v_height,w_slope,w_height)
+    if v_vert==0: 
+        if w_vert==0:
+            draw_circle=draw_lines([v,w],default_color,default_linewidth)
+            print(v,w)
+        elif w_hor==0: 
+            center=(v_hor,w_vert)
+            radius=eucl_dist(v,center)
+            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
+            draw_circle=patches.Circle(center,radius,color=default_color,linewidth=default_linewidth,fill=False)
+        else: 
+            center=(v_hor, w_slope*v_hor+w_height)
+            radius=eucl_dist(v,center)
+            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
+            
+    elif w_vert==0:
+        if v_hor==0:
+            center=(w_hor,v_vert)
+            radius = eucl_dist(v,center)
+            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
+            draw_circle=patches.Circle(center,radius,color=default_color,linewidth=default_linewidth,fill=False)
+        else: 
+            center=(w_hor, v_slope*w_hor+v_height)
+            radius=eucl_dist(v,center)
+            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
+            draw_circle=patches.Circle(center,radius,color=default_color,linewidth=default_linewidth,fill=False)
+    else: 
+        if v_slope==w_slope:
+            draw_circle=draw_lines([v,w],default_color,default_linewidth)
+        else: 
+            center=intersect_lines(v_slope,v_height,w_slope,w_height)
+            radius=eucl_dist(center,w)
+            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
+            draw_circle=patches.Circle(center,radius,color=default_color,linewidth=default_linewidth,fill=False)
+            draw_circle=ax.add_patch(draw_circle)
 
-        radius=eucl_dist(center,v)
+            print(v_slope,v_height,w_slope,w_height)
+            print(center)
+            print(radius)
 
-        draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
-
-        draw_circle=ax.add_patch(draw_circle)
     
     return draw_circle
 
@@ -257,9 +282,18 @@ n=2
 v=[sqrt(2)/2,sqrt(2)/2]
 w=[1/2,sqrt(3)/2]
 
-#poincare_orthocircle(v,w)
+poincare_orthocircle(v,w)
+
+v=[sqrt(2)/2,sqrt(2)/2]
+w=[0,1]
 #
-#poincare_orthocircle([0,1],[0,-1])
+poincare_orthocircle(v,w)
+
+
+
+
+poincare_orthocircle([1,0],[-1,0])
+poincare_orthocircle([0,1],[0,-1])
 
 axes = plt.gca()
 axes.set_xlim([-1.1,1.1])
