@@ -4,39 +4,39 @@ import matplotlib.pyplot as plt
 from matplotlib import patches
 import time
 from math import sqrt
+from math import pi 
+from math import sin 
+from math import cos
 start_time = time.time()
 
 ### generators of PSL(2,Z)
 
 A=[[1,1],[0,1]]
-B=[[0,1],[1,0]]
+B=[[0,-1],[1,0]]
 Ainv=np.linalg.inv(A)
-# note that B is its own inverse so we do not need to introduce it
 
-
-def mobius_reflection(a,b):
-    return np.matrix([[(a+b)/2,-a*b],[1,-(a+b)/2]])
-
-A=mobius_reflection(-2.414,.414)
-B=mobius_reflection(-.613,3.573)
-
-#print(A)
 # this is the standard conformal map sending the disk to the upper half
 # plane
-#a= complex(0,-1)
-#a=0-1j
-#print(a)
 J=np.array([[0-1j,1+0j],[1+0j,0-1j]])
 Jinv=np.linalg.inv(J)
 
-A=np.dot(A,J)
-A=np.dot(Jinv,A)
-B=np.dot(B,J)
-B=np.dot(Jinv,B)
-#print(J)
-#print(np.dot(J,A))
 
-#print(A)
+# pick two endpoints of a geodesic in the upper half plane 
+# define inversion through that geodesic
+def mobius_reflection(a,b):
+    return np.matrix([[(a+b)/2,-a*b],[1,-(a+b)/2]])
+
+# conjugate an element of PSL(2,R) into the isometry group of the Poincare
+# disk
+
+def conj_to_poincare(A):
+    A=np.dot(A,J)
+    A=np.dot(Jinv,A)
+    return A 
+
+
+
+
         
 
 ### function for matrix product
@@ -77,7 +77,10 @@ def mobius_transformation(M,z):
     c=M[1][0]
     d=M[1][1]
 
-    return (a*z+b)/(c*z+d)
+    #output is a complex number
+    w=(a*z+b)/(c*z+d)
+
+    return round(w.real, 5) + round(w.imag, 5) * 1j
 
 
 
@@ -142,6 +145,8 @@ def group_elts(n,generators=[A,B]):
         flat_list.extend(list_these_matrices[j+1])
     return flat_list
 
+
+
 #### draw some lines
 #
 def draw_lines(list_of_vectors, default_color='black',default_linewidth=1):
@@ -153,8 +158,6 @@ def draw_lines(list_of_vectors, default_color='black',default_linewidth=1):
 #for i in range(-2,3):
 #    draw_lines([[i,0],[i,3]])
 
-#n=3
-#for M in group_elts(n):
 
 ##### draw a geodesic orthocircle
 def upper_half_orthocircle(a,b,default_color='black',default_linewidth=1):
@@ -177,7 +180,10 @@ def intersect_lines(a,b,c,d):
 def slope_of_circ(v):
     a=v[0]
     b=v[1]
-    pos_slope=a/sqrt(1-a**2)
+    if abs(a)==1:
+        pos_slope=1
+    else: 
+        pos_slope=a/sqrt(1-a**2)
 
     if b<0:
         return pos_slope
@@ -201,10 +207,10 @@ def poincare_orthocircle(v,w,default_color='black',default_linewidth=1):
 #    v_vert=v[1]
 #    w_hor=w[0]
 #    w_vert=w[1]
-    v_hor=v.real
-    v_vert=v.imag
-    w_hor=w.real
-    w_vert=w.imag
+    v_hor=round(v.real,5)
+    v_vert=round(v.imag,5)
+    w_hor=round(w.real,5)
+    w_vert=round(w.imag,5)
 
     v_vec=[v_hor,v_vert]
     w_vec=[w_hor,w_vert]
@@ -219,35 +225,39 @@ def poincare_orthocircle(v,w,default_color='black',default_linewidth=1):
     if v_vert==0: 
         if w_vert==0:
             draw_circle=draw_lines([v_vec,w_vec],default_color,default_linewidth)
-#            print(v,w)
         elif w_hor==0: 
             center=(v_hor,w_vert)
             radius=eucl_dist(v_vec,center)
-            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
+#            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
             draw_circle=patches.Circle(center,radius,color=default_color,linewidth=default_linewidth,fill=False)
+            draw_circle=ax.add_patch(draw_circle)
         else: 
             center=(v_hor, w_slope*v_hor+w_height)
             radius=eucl_dist(v_vec,center)
-            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
+#            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
+            draw_circle=patches.Circle(center,radius,color=default_color,linewidth=default_linewidth,fill=False)
+            draw_circle=ax.add_patch(draw_circle)
             
     elif w_vert==0:
         if v_hor==0:
             center=(w_hor,v_vert)
             radius = eucl_dist(v_vec,center)
-            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
+#            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
             draw_circle=patches.Circle(center,radius,color=default_color,linewidth=default_linewidth,fill=False)
+            draw_circle=ax.add_patch(draw_circle)
         else: 
             center=(w_hor, v_slope*w_hor+v_height)
             radius=eucl_dist(v_vec,center)
-            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
+#            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
             draw_circle=patches.Circle(center,radius,color=default_color,linewidth=default_linewidth,fill=False)
+            draw_circle=ax.add_patch(draw_circle)
     else: 
         if v_slope==w_slope:
             draw_circle=draw_lines([v_vec,w_vec],default_color,default_linewidth)
         else: 
             center=intersect_lines(v_slope,v_height,w_slope,w_height)
             radius=eucl_dist(center,w_vec)
-            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
+#            draw_circle= patches.Arc(center, radius, radius, 0.0, 0.0, 360, color=default_color, linewidth=default_linewidth)
             draw_circle=patches.Circle(center,radius,color=default_color,linewidth=default_linewidth,fill=False)
             draw_circle=ax.add_patch(draw_circle)
 
@@ -276,71 +286,82 @@ def draw_geodesic(vectors, default_linewidth=1):
     else:
         ax.add_patch(orthocircle(v_hor,w_hor,'black',default_linewidth))
 
+# starting to draw
 
 fig = plt.figure()
 ax = fig.add_subplot()
 
-#ax.add_patch(orthocircle(-3,1))
-#ax.add_patch(orthocircle(-1,1))
 
-lw=.5
-
-
-#draw_lines([[-3,0],[3,0]],'black',lw)
-#draw_lines([[0,-3],[0,3]],'black',lw)
-
+# the boundary of the disk
 ax.add_patch(patches.Circle( (0,0),1,fill=False))
 
-#A=mobius_reflection(-2.414,.414)
-#B=mobius_reflection(-.613,3.573)
-#A=[[0,1],[1,0]]
+# init_geodesics is a list of generating geodesics in the tiling
+# list of vectors with distinct complex entries in the boundary of the
+# unit circle 
+# poincare_orthocircle will draw a geodesic between those endpoints for
+# each vector in the list
+
+init_geodesics=[[complex(sqrt(2)/2,sqrt(2)/2),complex(-sqrt(2)/2,-sqrt(2)/2)],[-1,1],[-1j,1j],[complex(-sqrt(2)/2,sqrt(2)/2),complex(sqrt(2)/2,-sqrt(2)/2)],[complex(-sqrt(3)/2,1/2),complex(-1/2,sqrt(3)/2)]]
+
+#for c in init_geodesics:
+#    poincare_orthocircle(c[0],c[1])
 
 
+# this is inversion through the unit circle in the upper half plane
+A=[[0,-1],[1,0]]
 
-#v=(sqrt(2)/2,sqrt(2)/2)
-
-
-#z= complex(sqrt(2)/2,sqrt(2)/2)
-#print(z)
+# this will be inversion through the real axis in the Poincare disk
+# note that this function preserves any line passing through the origin
+# as inversion in the upper half plane does for any geodesic through i
+# which intersects the unit disk orthogonally
+#A=[[-1,0],[0,1]]
+##A=conj_to_poincare(A) is not necessary here
 #
-#print(mobius_transformation(A,z))
-#
-#print(mobius_transformation(A,-1j))
-#print(mobius_transformation(A,-1))
-
-#n=2
-#for G in group_elts(n,[A,B]):
-    # apply G to v,w
-
-#w=1
-
-#Az=mobius_transformation(A,z)
-#Aw=mobius_transformation(A,w)
-
-
-
-
-A=[[0,1],[1,0]]
-v=complex(sqrt(2)/2,sqrt(2)/2) 
-w=1j
-
-#print()
-#print(v.real)
+#A=[[1,1],[0,1]]
+#B=[[0,-1],[1,0]]
 #
 
-poincare_orthocircle(v,w)
+A=mobius_reflection(-2.414,.414)
+B=mobius_reflection(-.613,3.573)
 
+A=conj_to_poincare(A)
+B=conj_to_poincare(B)
 
-poincare_orthocircle(mobius_transformation(A,v),mobius_transformation(A,w))
+#print(A,B)
 
-#w=complex(1/2,-sqrt(3)/2)
+n=2
+#print(group_elts(n,[A,B]))
+for G in group_elts(n,[A,B]):
+    for c in init_geodesics:
+        v=mobius_transformation(G,c[0])
+        w=mobius_transformation(G,c[1])
+        poincare_orthocircle(v,w)
+
+#G=group_elts(n,[A,B])[2]
+#c=init_geodesics[3]
+#v=mobius_transformation(G,c[0])
+#w=mobius_transformation(G,c[1])
+#print(v,w)
+#poincare_orthocircle(v,w)
+
 #
-##poincare_orthocircle(v,w)
+#for c in init_geodesics: v=mobius_transformation(G,c[0])
+#    w=mobius_transformation(G,c[1])
+#    print (v,w)
+##print(G)
+
+#for c in init_geodesics:
+#    print(c)
+#    v=mobius_transformation(G,c[0])
+#    w=mobius_transformation(G,c[1])
+#    poincare_orthocircle(v,w)
+#c=init_geodesics[4]
+#v=mobius_transformation(G,c[0])
+#w=mobius_transformation(G,c[1])
+#poincare_orthocircle(v,w)
 
 
 
-#poincare_orthocircle([1,0],[-1,0])
-#poincare_orthocircle([0,1],[0,-1])
 
 axes = plt.gca()
 axes.set_xlim([-1.1,1.1])
