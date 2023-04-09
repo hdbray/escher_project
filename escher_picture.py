@@ -135,7 +135,6 @@ def group_elts(n,generators=[A,B]):
     flat_list = []
     for j in range(n):
         for i in list_these_matrices[j]:
-#        range(len(list_these_matrices[j])):
             for M in generators:
                 with_duplicate_matrices[j+1].append(mp([M,i]))
                 with_duplicate_matrices[j+1].append(mp([i,M]))
@@ -301,25 +300,9 @@ ax.add_patch(patches.Circle( (0,0),1,fill=False))
 # poincare_orthocircle will draw a geodesic between those endpoints for
 # each vector in the list
 
-init_geodesics=[[complex(sqrt(2)/2,sqrt(2)/2),complex(-sqrt(2)/2,-sqrt(2)/2)],[-1,1],[-1j,1j],[complex(-sqrt(2)/2,sqrt(2)/2),complex(sqrt(2)/2,-sqrt(2)/2)],[complex(-sqrt(3)/2,1/2),complex(-1/2,sqrt(3)/2)]]
+#init_geodesics=[[complex(sqrt(2)/2,sqrt(2)/2),complex(-sqrt(2)/2,-sqrt(2)/2)],[-1,1],[-1j,1j],[complex(-sqrt(2)/2,sqrt(2)/2),complex(sqrt(2)/2,-sqrt(2)/2)],[complex(-sqrt(3)/2,1/2),complex(-1/2,sqrt(3)/2)]]
+init_geodesics=[[-1,1], [complex(-sqrt(3)/2,1/2),complex(-1/2,sqrt(3)/2)]]
 
-#for c in init_geodesics:
-#    poincare_orthocircle(c[0],c[1])
-
-
-# this is inversion through the unit circle in the upper half plane
-A=[[0,-1],[1,0]]
-
-# this will be inversion through the real axis in the Poincare disk
-# note that this function preserves any line passing through the origin
-# as inversion in the upper half plane does for any geodesic through i
-# which intersects the unit disk orthogonally
-#A=[[-1,0],[0,1]]
-##A=conj_to_poincare(A) is not necessary here
-#
-#A=[[1,1],[0,1]]
-#B=[[0,-1],[1,0]]
-#
 
 A=mobius_reflection(-2.414,.414)
 B=mobius_reflection(-.613,3.573)
@@ -327,9 +310,18 @@ B=mobius_reflection(-.613,3.573)
 A=conj_to_poincare(A)
 B=conj_to_poincare(B)
 
+A=[[complex(sqrt(2)/2,sqrt(2)/2),0],[0,1]]
+a=complex(-sqrt(3)/2,1/2)
+b=complex(-1/2,sqrt(3)/2)
+a=mobius_transformation(J,a)
+b=mobius_transformation(J,b)
+
+B=mobius_reflection(a,b)
+B=conj_to_poincare(B)
+
 #print(A,B)
 
-n=2
+n=8
 #print(group_elts(n,[A,B]))
 for G in group_elts(n,[A,B]):
     for c in init_geodesics:
